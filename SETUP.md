@@ -27,11 +27,9 @@ DATABASE_URL="your-neon-database-url"
 BETTER_AUTH_SECRET="your-secret-key-here"
 BETTER_AUTH_URL="http://localhost:3000"
 
-# Optional: Social Providers
-GITHUB_CLIENT_ID="your-github-client-id"
-GITHUB_CLIENT_SECRET="your-github-client-secret"
-GOOGLE_CLIENT_ID="your-google-client-id"
-GOOGLE_CLIENT_SECRET="your-google-client-secret"
+# X (Twitter) OAuth Provider
+TWITTER_CLIENT_ID="your-twitter-client-id"
+TWITTER_CLIENT_SECRET="your-twitter-client-secret"
 
 # Optional: Production URL
 NEXT_PUBLIC_APP_URL="https://your-production-domain.com"
@@ -44,12 +42,25 @@ NEXT_PUBLIC_APP_URL="https://your-production-domain.com"
    openssl rand -base64 32
    ```
 
-2. **Apply the database migration**:
+2. **Set up X (Twitter) OAuth credentials**:
+   - Go to the [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+   - Create a new app or use an existing one
+   - **CRITICAL**: You MUST change from OAuth 1.0a to OAuth 2.0:
+     - In your app settings, change "Type of App" to "Web App, Automated App or Bot"
+     - This enables OAuth 2.0 Authorization Code with PKCE
+   - Set the redirect URL to: `http://localhost:3000/api/auth/callback/twitter` (for development)
+   - For production, use: `https://your-domain.com/api/auth/callback/twitter`
+   - **IMPORTANT**: In your Twitter app permissions, select:
+     - "Read and write and Direct message" (this gives you tweet.read, tweet.write, users.read scopes)
+     - Enable "Request email from users" if you need email access
+   - Copy your Client ID and Client Secret to your `.env` file
+
+3. **Apply the database migration**:
    ```bash
    npx drizzle-kit migrate
    ```
 
-3. **Start using authentication** in your components:
+4. **Start using authentication** in your components:
    ```tsx
    import { useSession, signIn, signOut } from "@/lib/auth-client";
    
@@ -66,9 +77,14 @@ NEXT_PUBLIC_APP_URL="https://your-production-domain.com"
      }
      
      return (
-       <button onClick={() => signIn.email({ email: "user@example.com", password: "password" })}>
-         Sign In
-       </button>
+       <div>
+         <button onClick={() => signIn.social({ provider: "twitter" })}>
+           Sign In with X
+         </button>
+         <button onClick={() => signIn.email({ email: "user@example.com", password: "password" })}>
+           Sign In with Email
+         </button>
+       </div>
      );
    }
    ```
@@ -76,8 +92,9 @@ NEXT_PUBLIC_APP_URL="https://your-production-domain.com"
 ## 🔐 Available Authentication Methods
 
 - **Email/Password** - Ready to use
-- **GitHub OAuth** - Configure with client ID/secret
-- **Google OAuth** - Configure with client ID/secret
+- **X (Twitter) OAuth** - Configure with client ID/secret
+  - Scopes: `tweet.read`, `tweet.write`, `users.read`
+  - Supports reading, writing, and deleting tweets
 
 ## 📚 Documentation
 

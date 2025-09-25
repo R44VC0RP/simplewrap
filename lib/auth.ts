@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { apiKey } from "better-auth/plugins";
 import { db } from "./db";
 import * as schema from "./schema";
 
@@ -11,6 +12,16 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
   },
+  plugins: [
+    apiKey({
+      permissions: {
+        defaultPermissions: {
+          tweets: ["read", "write"],
+          profile: ["read"],
+        },
+      },
+    }),
+  ],
   socialProviders: {
     twitter: {
       clientId: process.env.TWITTER_CLIENT_ID as string,

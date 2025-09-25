@@ -1,58 +1,113 @@
-"use client";
-
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
+import { APIKeysManager } from "@/components/APIKeysManager";
+import { APIKey } from "@/lib/types";
+import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { signIn, useSession } from "@/lib/auth-client";
+import { ClickToCopy } from "@/components/ClickToCopy";
 
-export default function Home() {
-  const { data: session } = useSession();
+export default async function Home() {
+  // Get session data on the server
+  const session = await auth.api.getSession({
+    headers: await headers()
+  });
 
-  const handleTwitterLogin = async () => {
+  // Preload API keys data if user is authenticated
+  let initialApiKeys: APIKey[] = [];
+  if (session) {
     try {
-      await signIn.social({ provider: "twitter" });
+      const apiKeysResponse = await auth.api.listApiKeys({
+        headers: await headers()
+      });
+      initialApiKeys = apiKeysResponse || [];
     } catch (error) {
-      console.error("Login failed:", error);
+      console.error("Failed to fetch API keys:", error);
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto">
         {/* Hero Section */}
-        <div className="text-center py-20">
-          <h1 className="text-5xl md:text-6xl font-heading font-semibold mb-6">
-            Easy X API + SDK
-          </h1>
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed font-medium tracking-tight-4">
-            Get an easy to use API + SDK for posting and reading from X. 
+        <div className="flex flex-col items-left justify-left gap-2 border-b-2 border-dotted border-muted-foreground/30 py-4">
+          <code className="text-3xl md:text-4xl font-heading font-semibold p-2 bg-accent w-fit">
+            bun i simplewrap
+          </code>
+          <p className="text-lg md:text-xl text-muted-foreground mb-2 max-w-2xl leading-relaxed font-medium tracking-tight-4">
+            Get an easy to use API + SDK for posting and reading from X.
             Build powerful social media integrations with simple, developer-friendly tools.
           </p>
-          
-          {session ? (
-            <div className="space-y-4">
-              <p className="text-lg text-foreground font-medium tracking-tight-4">
-                Welcome back, {session.user.name}! 👋
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <button className="inline-flex items-center justify-center rounded-lg bg-foreground text-background px-8 py-4 text-lg font-medium tracking-tight-4 hover:bg-foreground/90 transition-colors">
-                  View API Docs
-                </button>
-                <button className="inline-flex items-center justify-center rounded-lg border border-border bg-background text-foreground px-8 py-4 text-lg font-medium tracking-tight-4 hover:bg-muted transition-colors">
-                  Dashboard
-                </button>
-              </div>
-            </div>
-          ) : (
-            <Button
-              onClick={handleTwitterLogin}
-              className="inline-flex items-center justify-center rounded-lg bg-foreground text-background px-8 py-4 text-lg font-medium tracking-tight-4 hover:bg-foreground/90 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-            >
-              <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-              </svg>
-              Login with X
-            </Button>
+
+          {!session && (
+            <Link href="/login" className="text-lg text-muted-foreground font-medium tracking-tight-4 my-4 mb-2">
+              <Button variant="default">
+                Login with
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-twitter-x" viewBox="0 0 16 16">
+                  <path d="M12.6.75h2.454l-5.36 6.142L16 15.25h-4.937l-3.867-5.07-4.425 5.07H.316l5.733-6.57L0 .75h5.063l3.495 4.633L12.601.75Zm-.86 13.028h1.36L4.323 2.145H2.865z" />
+                </svg>
+              </Button>
+            </Link>
           )}
         </div>
+
+        {/* API Management Section - Only show when logged in */}
+        {session && (
+          <div className="space-y-8">
+            <div className="flex flex-row justify-between">
+
+              <Link href={`https://x.com/${session.user.email}`} className="text-lg text-foreground/90 font-medium tracking-tight-4 my-4 mb-2 inline-flex items-center gap-1">
+                <Image src={session.user.image || ""} alt={session.user.name} width={20} height={20} className="rounded-full" />
+                @{session.user.email}
+              </Link>
+
+              <Link href="/logout" className="text-lg text-muted-foreground font-medium tracking-tight-4 my-4 mb-2">
+                <Button variant="outline">
+                  Logout
+                </Button>
+              </Link>
+            </div>
+
+            {/* API Documentation */}
+            <div className="space-y-4 border-b-2 border-dotted border-muted-foreground/30 pb-4">
+              <h2 className="text-2xl font-heading font-semibold text-foreground">API & SDK Documentation</h2>
+              <div className="flex flex-row justify-between">
+                Base URL:
+                <ClickToCopy text="https://simplewrap.dev" />
+              </div>
+              <div className="space-y-3">
+                <h3 className="font-heading font-semibold text-foreground mb-2">Posting a Tweet</h3>
+                <h4 className="font-heading font-semibold text-foreground mb-2">SDK</h4>
+                <div className="bg-muted rounded p-3 text-sm font-mono">
+                  
+                  <pre className="text-muted-foreground mb-2">
+                    <ClickToCopy text="/api/v1/post" variant="minimal" />
+                  </pre>
+                  <div className="text-muted-foreground mb-2">Headers:</div>
+                  <div>Authorization: Bearer YOUR_API_KEY</div>
+                  <div>Content-Type: application/json</div>
+                  <div className="text-muted-foreground mb-2 mt-3">Body:</div>
+                  <div>{`{ "text": "Hello from the API!" }`}</div>
+                </div>
+                <h4 className="font-heading font-semibold text-foreground mb-2">API</h4>
+                <div className="bg-muted rounded p-3 text-sm font-mono">
+                  <pre className="text-muted-foreground mb-2">
+                    <ClickToCopy text="/api/v1/post" variant="minimal" />
+                  </pre>
+                  <div className="text-muted-foreground mb-2">Headers:</div>
+                  <div>Authorization: Bearer YOUR_API_KEY</div>
+                  <div>Content-Type: application/json</div>
+                  <div className="text-muted-foreground mb-2 mt-3">Body:</div>
+                  <div>{`{ "text": "Hello from the API!" }`}</div>
+                </div>
+
+              </div>
+            </div>
+
+            {/* API Key Management */}
+            <APIKeysManager initialApiKeys={initialApiKeys} />
+          </div>
+        )}
 
         {/* Features Section */}
         <div className="grid md:grid-cols-3 gap-8 py-16">

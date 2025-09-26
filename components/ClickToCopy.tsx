@@ -8,9 +8,10 @@ interface ClickToCopyProps {
   copyButton?: CopyButtonPosition;
   text: string;
   variant?: "default" | "minimal";
+  onCopy?: () => void;
 }
 
-export function ClickToCopy({ copyButton = "right", text, variant = "default" }: ClickToCopyProps) {
+export function ClickToCopy({ copyButton = "right", text, variant = "default", onCopy }: ClickToCopyProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(async () => {
@@ -18,10 +19,11 @@ export function ClickToCopy({ copyButton = "right", text, variant = "default" }:
       await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
+      onCopy?.();
     } catch (error) {
       console.error("Copy failed:", error);
     }
-  }, [text]);
+  }, [text, onCopy]);
 
   const CopyIcon = (
     <svg
@@ -48,7 +50,7 @@ export function ClickToCopy({ copyButton = "right", text, variant = "default" }:
       fill="none"
       stroke="currentColor"
       strokeWidth="2.5"
-      className="size-4 text-green-600"
+      className="size-4 text-[#466F80]"
       aria-hidden="true"
     >
       <path strokeLinecap="round" strokeLinejoin="round" d="m5 13 4 4L19 7" />

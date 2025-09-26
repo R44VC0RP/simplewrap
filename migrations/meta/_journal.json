@@ -15,6 +15,20 @@
       "when": 1758819956939,
       "tag": "0001_past_trauma",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1758833047071,
+      "tag": "0002_acoustic_ego",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1758847857780,
+      "tag": "0003_fantastic_frightful_four",
+      "breakpoints": true
     }
   ]
 }

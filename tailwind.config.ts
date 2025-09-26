@@ -14,7 +14,7 @@ const config: Config = {
         heading: ["Outfit", "sans-serif"],
       },
       letterSpacing: {
-        'tight-4': '-0.04em',
+        'tight-4': '-0.02em',
       },
       borderRadius: {
         lg: "var(--radius)",

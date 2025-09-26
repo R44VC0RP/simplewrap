@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://simplewrap.dev/sitemap.xml
+
+# Crawl-delay for polite bots
+Crawl-delay: 1
+
+# Block access to API endpoints for crawlers
+Disallow: /api/
+
+# Allow access to documentation and main pages
+Allow: /privacy
+Allow: /tos
+Allow: /login
+Allow: /logout

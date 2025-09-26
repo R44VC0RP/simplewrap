@@ -352,7 +352,7 @@ export default async function Home() {
         <footer className="border-t border-border pt-8 mt-16">
           <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
             <p className="text-sm text-muted-foreground font-medium tracking-tight-4">
-              © {new Date().getFullYear()} EXON ENTERPRISE LLC. All rights
+              © {new Date().getFullYear()} SimpleWrap. All rights
               reserved.
             </p>
             <div className="flex space-x-6">
